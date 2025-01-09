@@ -57,11 +57,4 @@ A feature-rich Chess application that allows players to engage in games locally 
     --java-options "-Xmx1024m"
 3. For Windows (msi)
    ```bash
-   jpackage \
-    --input target \
-    --name ChessApp \
-    --main-jar ChessApp-1.0-shaded.jar \
-    --main-class com.example.chessfinalproject.Main \
-    --type msi \
-    --icon src/main/resources/com/example/chessfinalproject/icons/chess_icon.icns \
-    --java-options "-Xmx1024m"
+   jpackage --input target --name ChessApp --main-jar ChessApp-1.0-shaded.jar --main-class com.example.chessfinalproject.Main --type msi --icon src\main\resources\com\example\chessfinalproject\icons\chess_icon.ico --java-options "-Xmx1024m"
