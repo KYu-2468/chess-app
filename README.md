@@ -53,7 +53,6 @@ A feature-rich Chess application that allows players to engage in games locally 
     --main-jar ChessApp-1.0-shaded.jar \
     --main-class com.example.chessfinalproject.Main \
     --type deb \
-    --mac-package-name "Chess" \
     --icon src/main/resources/com/example/chessfinalproject/icons/chess_icon.icns \
     --java-options "-Xmx1024m"
 3. For Windows (msi)
@@ -64,6 +63,5 @@ A feature-rich Chess application that allows players to engage in games locally 
     --main-jar ChessApp-1.0-shaded.jar \
     --main-class com.example.chessfinalproject.Main \
     --type msi \
-    --mac-package-name "Chess" \
     --icon src/main/resources/com/example/chessfinalproject/icons/chess_icon.icns \
     --java-options "-Xmx1024m"
