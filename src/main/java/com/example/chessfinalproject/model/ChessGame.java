@@ -56,12 +56,12 @@ public class ChessGame {
                 System.out.println("List size changed: " + newValue);
                 Platform.runLater(controller::updateView);
             });
-            this.initializeOnlineGame();
+            this.initializeOnlineGame(controller);
         }
     }
 
-    public void initializeOnlineGame() {
-        this.webSocketClient = new WebSocketClient(this);
+    public void initializeOnlineGame(ChessController controller) {
+        this.webSocketClient = new WebSocketClient(this, controller);
     }
 
     public boolean isOnlineGame() {

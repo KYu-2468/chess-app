@@ -31,3 +31,39 @@ A feature-rich Chess application that allows players to engage in games locally 
 4. To run the app locally:
    ```bash
    mvn javafx:run
+   
+### Building and distribution
+
+1. For MacOS
+   ```bash
+   jpackage \
+    --input target \
+    --name ChessApp \
+    --main-jar ChessApp-1.0-shaded.jar \
+    --main-class com.example.chessfinalproject.Main \
+    --type dmg \
+    --mac-package-name "Chess" \
+    --icon src/main/resources/com/example/chessfinalproject/icons/chess_icon.icns \
+    --java-options "-Xmx1024m"
+2. For Linux (Debian)
+   ```bash
+   jpackage \
+    --input target \
+    --name ChessApp \
+    --main-jar ChessApp-1.0-shaded.jar \
+    --main-class com.example.chessfinalproject.Main \
+    --type deb \
+    --mac-package-name "Chess" \
+    --icon src/main/resources/com/example/chessfinalproject/icons/chess_icon.icns \
+    --java-options "-Xmx1024m"
+3. For Windows (msi)
+   ```bash
+   jpackage \
+    --input target \
+    --name ChessApp \
+    --main-jar ChessApp-1.0-shaded.jar \
+    --main-class com.example.chessfinalproject.Main \
+    --type msi \
+    --mac-package-name "Chess" \
+    --icon src/main/resources/com/example/chessfinalproject/icons/chess_icon.icns \
+    --java-options "-Xmx1024m"

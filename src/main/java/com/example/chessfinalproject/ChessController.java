@@ -2,15 +2,19 @@ package com.example.chessfinalproject;
 
 import com.example.chessfinalproject.model.ChessBoard;
 import com.example.chessfinalproject.model.ChessGame;
+import com.example.chessfinalproject.model.Player;
 import com.example.chessfinalproject.model.pieces.King;
 import com.example.chessfinalproject.model.pieces.Piece;
 import com.example.chessfinalproject.model.pieces.Rook;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -19,6 +23,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.scene.control.ProgressIndicator;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 
@@ -33,6 +39,8 @@ public class ChessController {
     public GridPane chessBoard;
     @FXML
     public AnchorPane anchor;
+    // Loading overlay pane
+    private StackPane loadingOverlay;
 
     @FXML protected void playLocal() {
         game = new ChessGame();
@@ -42,6 +50,7 @@ public class ChessController {
 
     @FXML
     protected void playOnline(ActionEvent event) {
+        this.showLoadingOverlay();
         game = new ChessGame(true, this);
         this.board = game.getBoard();
         this.updateView();
@@ -58,8 +67,8 @@ public class ChessController {
 
         if (this.isPieceSelected) {
             if (selectedPiece.isValidMove(this.board, row, col)) {
+                // check if is castle
                 if (selectedPiece instanceof King king && king.isFirstMove()) {
-                    // check if is castle
                     if (col == 6) {
                         if (this.game.isOnlineGame()) {
                             this.game.getWebSocketClient().emitMove(row, 7, row, col - 1);
@@ -86,19 +95,24 @@ public class ChessController {
                 if (this.game.getPlayerToMove().getColor().equals("white")) {
                     if (this.board.blackKing.isInCheckMate(board)) {
                         // white win
-                        this.game.setWinner(this.game.getPlayer1());
-                    }
-                    if (!this.game.isOnlineGame()) {
-                        this.game.setPlayerToMove(this.game.getPlayer2());
+                        Player winner = this.game.getPlayer1().getColor().equals("white") ?
+                                this.game.getPlayer1() : this.game.getPlayer2();
+                        this.game.setWinner(winner);
                     }
                 } else {
                     if (this.board.whiteKing.isInCheckMate(board)) {
                         // black win
-                        this.game.setWinner(this.game.getPlayer2());
+                        Player winner = this.game.getPlayer1().getColor().equals("black") ?
+                                this.game.getPlayer1() : this.game.getPlayer2();
+                        this.game.setWinner(winner);
                     }
-                    if (!this.game.isOnlineGame()) {
-                        this.game.setPlayerToMove(this.game.getPlayer1());
-                    }
+                }
+
+                // Set opponent player to move
+                if (this.game.getPlayerToMove().equals(this.game.getPlayer1())) {
+                    this.game.setPlayerToMove(this.game.getPlayer2());
+                } else {
+                    this.game.setPlayerToMove(this.game.getPlayer1());
                 }
 
                 if (this.selectedPiece instanceof King king) {
@@ -205,9 +219,15 @@ public class ChessController {
             text.setFill(Color.WHITE);
             text.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
-            Button playAgainButton = new Button("Play Again");
+            Button playAgainButton = new Button("Play Locally");
             playAgainButton.setOnAction(e -> {
                 this.playLocal();
+                anchor.getChildren().remove(overlay);
+            });
+
+            Button playAgainOnlineButton = new Button("Play Online");
+            playAgainOnlineButton.setOnAction(e -> {
+                this.playOnline(e);
                 anchor.getChildren().remove(overlay);
             });
 
@@ -216,14 +236,66 @@ public class ChessController {
                 Platform.exit(); // Close the application
             });
 
-            vbox.getChildren().addAll(text, playAgainButton, exitButton);
+            vbox.getChildren().addAll(text, playAgainButton, playAgainOnlineButton, exitButton);
             vbox.setStyle("-fx-alignment: center;");
 
             overlay.getChildren().add(vbox);
 
             // Add the overlay to the AnchorPane
             anchor.getChildren().add(overlay);
+
+            this.game.getWebSocketClient().endConnection();
         }
+    }
+
+    // Function to create a loading overlay
+    public void showLoadingOverlay() {
+        // Create a StackPane for the overlay
+        loadingOverlay = new StackPane();
+        loadingOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);"); // Semi-transparent dark background
+        loadingOverlay.setPrefSize(anchor.getPrefWidth(), anchor.getPrefHeight());
+
+        // Add a ProgressIndicator for loading animation
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        loadingOverlay.getChildren().add(progressIndicator);
+
+        // Center the progress indicator
+        StackPane.setAlignment(progressIndicator, javafx.geometry.Pos.CENTER);
+
+        // Add the overlay to the AnchorPane
+        anchor.getChildren().add(loadingOverlay);
+    }
+
+    // Function to remove the loading overlay
+    public void removeLoadingOverlay() {
+        if (loadingOverlay != null) {
+            anchor.getChildren().remove(loadingOverlay);
+        }
+    }
+
+    public void startGameOverlay() {
+        // Create the overlay
+        StackPane startGameOverlay = new StackPane();
+        startGameOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7);");
+        startGameOverlay.setPrefSize(anchor.getPrefWidth(), anchor.getPrefHeight());
+
+        // Create the label
+        Label startGameLabel = new Label("Start Game");
+        startGameLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: white;");
+
+        // Add the label to the overlay
+        startGameOverlay.getChildren().add(startGameLabel);
+
+        // Add the overlay to the anchor pane
+        anchor.getChildren().add(startGameOverlay);
+
+        // Automatically remove the overlay after 3 seconds
+        Timeline timeline = new Timeline(new KeyFrame(
+                Duration.seconds(3),
+                event -> anchor.getChildren().remove(startGameOverlay)
+        ));
+        timeline.setCycleCount(1);
+        timeline.play();
     }
 
     public ArrayList<int[]> filterValidMovesBlockingCheck(King playerToMoveKing) {
